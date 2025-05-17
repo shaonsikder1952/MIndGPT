@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BrainGPT – {{ username }}</title>
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}" />
+</head>
+<body>
+    <header>
+      <div class="logo">MindGPT</div>
+      <button class="logout-btn" id="logout-btn" title="Logout">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </header>
+
+
+  <div class="container">
+    <nav class="sidebar" aria-label="Sidebar with chat controls">
+      <button class="new-chat" id="new-chat-btn" title="Start New Chat">
+        <i class="fas fa-plus"></i> New Chat
+      </button>
+
+      <button class="prev-toggle" id="previous-chat" title="Show Previous Conversation">
+        <i class="fas fa-history"></i> Previous
+      </button>
+      <div id="previous-chat-messages" class="prev-panel"></div>
+
+      <div class="chat-history">
+        {% if sessions %}
+          <ul>
+            {% for s in sessions %}
+              <li class="chat-history-item" data-chat-id="{{ s.id }}" tabindex="0">
+                <i class="fas fa-comments"></i>
+                <span class="title">{{ s.title }}</span>
+                <button class="delete-session" data-session-id="{{ s.id }}" aria-label="Delete">
+                  🗑️
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="no-chats">No chats yet</p>
+        {% endif %}
+      </div>
+    </nav>
+
+    <main class="chat-area" role="main" aria-live="polite">
+      <div class="messages" id="messages" aria-label="Chat messages"></div>
+      <form id="chat-form" aria-label="Send message form">
+        <input
+          type="text"
+          id="message-input"
+          autocomplete="off"
+          placeholder="Type your message..."
+          required
+          autofocus
+        />
+        <button type="submit" class="send-btn" aria-label="Send message">
+          <i class="fas fa-paper-plane"></i> Send
+        </button>
+      </form>
+    </main>
+  </div>
+
+  <!-- Logout confirmation modal -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <p id="modal-desc">Are you sure you want to log out?</p>
+      <button class="confirm" id="confirm-logout">Yes, Log out</button>
+      <button class="cancel" id="cancel-logout">Cancel</button>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

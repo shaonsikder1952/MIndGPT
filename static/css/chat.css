@@ -1,0 +1,232 @@
+/* chat.css (with enhancements) */
+
+/* 1) Palette variables */
+:root {
+  --bg-primary:    #F5F4F1;
+  --bg-secondary:  #E8E6E3;
+  --text-primary:  #333333;
+  --text-secondary:#666666;
+  --accent-primary:#5DA4C8;
+  --accent-secondary:#A8C6A8;
+  --accent-highlight:#D99082;
+  --btn-bg:        #111111;  /* muted black */
+  --btn-hover:     #333333;
+  --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+}
+
+/* 2) Reset & base */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  height: 100%; overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex; flex-direction: column;
+}
+
+/* 3) Header */
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  height: 50px; padding: 0 20px;
+  background: var(--bg-secondary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+header .logo {
+  font-size: 1.2rem; font-weight: 600;
+  color: var(--text-secondary);
+  user-select: none;
+}
+header .logout-btn {
+  padding: 6px 14px; border-radius: 4px;
+  background: var(--btn-bg);
+  color: #E5E5E5; border: none;
+  cursor: pointer; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  transition: background .2s;
+}
+header .logout-btn:hover {
+  background: var(--btn-hover);
+}
+
+/* 4) Layout */
+.container {
+  flex: 1; display: flex;
+  height: calc(100vh - 50px);
+}
+@media (max-width: 768px) {
+  .container { flex-direction: column; }
+  .sidebar { width: 100%; order: 2; max-height: 200px; overflow-y: auto; }
+  .chat-area { order: 1; height: calc(100vh - 250px); }
+}
+
+/* 5) Sidebar */
+.sidebar {
+  width: 280px; padding: 10px;
+  background: var(--bg-secondary);
+  border-right: 1px solid #ccc;
+  display: flex; flex-direction: column;
+}
+.sidebar .new-chat,
+.sidebar .prev-toggle {
+  padding: 12px; border-radius: 8px;
+  background: var(--btn-bg);
+  color: #E5E5E5; border: none;
+  font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px; transition: background .2s;
+}
+.sidebar .new-chat:hover,
+.sidebar .prev-toggle:hover {
+  background: var(--btn-hover);
+}
+
+/* Collapsible "Previous" panel */
+.prev-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease;
+}
+.prev-panel.open {
+  max-height: 300px;
+}
+
+/* Chat history list */
+.chat-history {
+  flex: 1; overflow-y: auto;
+  padding-right: 5px;
+}
+.chat-history ul {
+  list-style: none; margin: 0; padding: 0;
+}
+.chat-history-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; margin-bottom: 8px;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  border-radius: 8px; cursor: pointer;
+  transition: background .2s;
+}
+.chat-history-item i {
+  color: var(--accent-primary);
+}
+.chat-history-item:hover {
+  background: var(--bg-secondary);
+}
+
+.chat-history-item.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-weight: bold;
+}
+
+
+/* 6) Chat area */
+.chat-area {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--bg-secondary);
+  padding: 20px;
+  overflow: auto;
+}
+.messages {
+  flex: 1; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 12px;
+  padding-right: 10px;
+}
+.message {
+  max-width: 70%; padding: 14px 20px;
+  border-radius: 16px; line-height: 1.4;
+  word-wrap: break-word;
+}
+.message.user {
+  background: rgba(93,164,200,0.1);
+  border: 1px solid var(--accent-primary);
+  align-self: flex-end; color: var(--text-primary);
+}
+.message.ai {
+  background: var(--bg-primary);
+  border: 1px solid #ccc;
+  align-self: flex-start; color: var(--text-primary);
+}
+
+/* 7) Input form */
+form {
+  display: flex; gap: 10px;
+  border-top: 1px solid #ccc; padding-top: 10px;
+}
+input[type="text"] {
+  flex: 1; padding: 12px;
+  border: none; border-radius: 12px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  outline: 2px solid var(--accent-primary);
+}
+input::placeholder {
+  color: var(--text-secondary);
+}
+button.send-btn {
+  padding: 0 20px; border-radius: 12px;
+  background: var(--btn-bg);
+  color: #E5E5E5; border: none;
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer; transition: background .2s;
+}
+button.send-btn:hover {
+  background: var(--btn-hover);
+}
+
+/* 8) Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+/* 9) Modal Overlay & Dialog */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: var(--modal-overlay-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal {
+  background: var(--bg-secondary);
+  padding: 24px 32px; border-radius: 8px;
+  max-width: 320px; width: 90%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  text-align: center; color: var(--text-primary);
+}
+.modal p {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+}
+.modal button {
+  margin: 0 8px; padding: 10px 20px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  font-weight: 600; cursor: pointer;
+  transition: background .2s;
+}
+.modal button.confirm {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+.modal button.confirm:hover {
+  background: #222;
+}
+.modal button.cancel {
+  background: #fff;
+  color: #000;
+}
+.modal button.cancel:hover {
+  background: #eee;
+}

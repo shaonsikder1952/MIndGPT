@@ -1,0 +1,72 @@
+/* auth.css */
+
+/* --- Color variables (same palette) --- */
+:root {
+  --bg-primary: #F5F4F1;
+  --bg-secondary: #E8E6E3;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --accent-primary: #5DA4C8;
+  --accent-highlight: #D99082;
+}
+
+body {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-family: "Segoe UI", sans-serif;
+  margin: 0; padding: 0;
+}
+
+.container {
+  max-width: 400px;
+  margin: 5vh auto;
+  background-color: var(--bg-primary);
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 5px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  background-color: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #4b8fb0;
+}
+
+.alt-auth {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.alt-auth a {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
