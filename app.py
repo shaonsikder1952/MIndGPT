@@ -9,8 +9,6 @@ import requests
 # OAuth Key
 import os
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-print("🧪 DEBUG: Loaded OPENROUTER_API_KEY =", OPENROUTER_API_KEY)
-
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'

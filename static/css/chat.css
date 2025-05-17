@@ -1,4 +1,4 @@
-/* chat.css (with enhancements) */
+/* chat.css (optimized for mobile and desktop) */
 
 /* 1) Palette variables */
 :root {
@@ -9,7 +9,7 @@
   --accent-primary:#5DA4C8;
   --accent-secondary:#A8C6A8;
   --accent-highlight:#D99082;
-  --btn-bg:        #111111;  /* muted black */
+  --btn-bg:        #111111;
   --btn-hover:     #333333;
   --modal-overlay-bg: rgba(0, 0, 0, 0.7);
 }
@@ -32,6 +32,7 @@ header {
   background: var(--bg-secondary);
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   z-index: 10;
+  flex-shrink: 0;
 }
 header .logo {
   font-size: 1.2rem; font-weight: 600;
@@ -52,13 +53,32 @@ header .logout-btn:hover {
 
 /* 4) Layout */
 .container {
-  flex: 1; display: flex;
+  flex: 1;
+  display: flex;
   height: calc(100vh - 50px);
+  overflow: hidden;
 }
+
+/* Responsive layout */
 @media (max-width: 768px) {
-  .container { flex-direction: column; }
-  .sidebar { width: 100%; order: 2; max-height: 200px; overflow-y: auto; }
-  .chat-area { order: 1; height: calc(100vh - 250px); }
+  .container {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    max-height: 220px;
+    order: 1;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid #ccc;
+  }
+  .chat-area {
+    order: 2;
+    height: calc(100vh - 270px);
+  }
+  input[type="text"] {
+    font-size: 1rem;
+  }
 }
 
 /* 5) Sidebar */
@@ -67,6 +87,7 @@ header .logout-btn:hover {
   background: var(--bg-secondary);
   border-right: 1px solid #ccc;
   display: flex; flex-direction: column;
+  flex-shrink: 0;
 }
 .sidebar .new-chat,
 .sidebar .prev-toggle {
@@ -82,7 +103,6 @@ header .logout-btn:hover {
   background: var(--btn-hover);
 }
 
-/* Collapsible "Previous" panel */
 .prev-panel {
   max-height: 0;
   overflow: hidden;
@@ -92,7 +112,6 @@ header .logout-btn:hover {
   max-height: 300px;
 }
 
-/* Chat history list */
 .chat-history {
   flex: 1; overflow-y: auto;
   padding-right: 5px;
@@ -114,13 +133,11 @@ header .logout-btn:hover {
 .chat-history-item:hover {
   background: var(--bg-secondary);
 }
-
 .chat-history-item.active {
   background: var(--accent-primary);
   color: #ffffff;
   font-weight: bold;
 }
-
 
 /* 6) Chat area */
 .chat-area {
@@ -135,9 +152,10 @@ header .logout-btn:hover {
   padding-right: 10px;
 }
 .message {
-  max-width: 70%; padding: 14px 20px;
+  max-width: 80%; padding: 14px 20px;
   border-radius: 16px; line-height: 1.4;
   word-wrap: break-word;
+  font-size: 1rem;
 }
 .message.user {
   background: rgba(93,164,200,0.1);
@@ -154,6 +172,7 @@ header .logout-btn:hover {
 form {
   display: flex; gap: 10px;
   border-top: 1px solid #ccc; padding-top: 10px;
+  flex-shrink: 0;
 }
 input[type="text"] {
   flex: 1; padding: 12px;
