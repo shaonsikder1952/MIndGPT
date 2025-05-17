@@ -81,7 +81,7 @@ header .logout-btn:hover {
 /* 6) Sidebar (off‑canvas by default) */
 .sidebar {
   position: fixed; top: 50px; left: 0;
-  width: 50vw;
+  width: 30vw;
   height: calc(100% - 50px);
   background: var(--bg-secondary);
   border-right: 1px solid #ccc;
@@ -95,7 +95,7 @@ header .logout-btn:hover {
 }
 
 .app.sidebar-open .chat-area {
-  margin-left: 50vw;
+  margin-left: 30vw;
 }
 
 /* 7) Responsive override (mobile) */
@@ -104,26 +104,28 @@ header .logout-btn:hover {
     flex-direction: column;
     height: auto;
   }
+
   .sidebar {
-    position: relative;
-    width: 100%;
-    transform: none;
-    max-height: 0;
-    overflow: hidden;
-    border-right: none;
-    border-bottom: 1px solid #ccc;
-    transition: max-height .3s ease;
+    position: fixed;
+    width: 30vw; /* ✅ Consistent width */
+    transform: translateX(-100%);
+    max-height: 100%; /* ✅ Ensure it shows full height */
+    overflow-y: auto;
   }
+
   .sidebar.open {
-    max-height: 50vh;
+    transform: translateX(0);
   }
+
   .app.sidebar-open .chat-area {
-    margin-left: 0;
+    margin-left: 30vw; /* ✅ Match sidebar width */
   }
+
   .chat-area {
-    height: calc(100vh - 50px - 200px);
+    height: calc(100vh - 50px); /* ✅ Fill remaining space */
   }
 }
+
 
 /* 8) Sidebar contents */
 .sidebar .new-chat,
