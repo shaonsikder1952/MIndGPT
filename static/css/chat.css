@@ -274,3 +274,17 @@ button.send-btn:hover {
 .modal button.cancel:hover {
   background: #eee;
 }
+/* chat.css (optimized for mobile and desktop) */
+
+/* ✅ Fix for mobile keyboard overlap (uses dynamic viewport height) */
+@supports (height: 100dvh) {
+  .chat-area {
+    height: calc(100dvh - 50px);
+  }
+
+  @media (max-width: 768px) {
+    .chat-area {
+      height: calc(100dvh - 50px);
+    }
+  }
+}
