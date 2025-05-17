@@ -225,3 +225,22 @@ button.send-btn:hover {
 .modal button.cancel:hover {
   background: #4b8fb0;
 }
+/* Sidebar responsive behavior for mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%; /* Full width on small screens */
+    transform: none; /* Ensure it's not hidden */
+    max-height: 0; /* Initially collapsed */
+    overflow: hidden;
+    border-right: none;
+    border-bottom: 1px solid #ccc;
+    transition: max-height 0.3s ease;
+  }
+  .sidebar.open {
+    max-height: 50vh; /* Expand on toggle */
+  }
+  .app.sidebar-open .chat-area {
+    margin-left: 0; /* No offset for chat area */
+  }
+}

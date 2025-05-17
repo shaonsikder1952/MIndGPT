@@ -7,8 +7,7 @@ from datetime import datetime
 import requests
 
 # OAuth Key
-import os
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_KEY = "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"
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
