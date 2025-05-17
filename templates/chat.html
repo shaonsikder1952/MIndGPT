@@ -11,15 +11,16 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}" />
 </head>
 <body>
-    <header>
-      <div class="logo">MindGPT</div>
-      <button class="logout-btn" id="logout-btn" title="Logout">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
-    </header>
+  <header>
+    <div class="logo">MindGPT</div>
+    <button class="logout-btn" id="logout-btn" title="Logout">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+    <!-- moved into header, right side -->
+    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+  </header>
 
-
+  <!-- WRAPPER ADDED HERE -->
   <div class="app">
     <nav class="sidebar" aria-label="Sidebar with chat controls">
       <button class="new-chat" id="new-chat-btn" title="Start New Chat">
@@ -67,6 +68,7 @@
       </form>
     </main>
   </div>
+  <!-- WRAPPER ENDS HERE -->
 
   <!-- Logout confirmation modal -->
   <div class="modal-overlay" id="modal-overlay">
@@ -78,11 +80,12 @@
   </div>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
-<script>
-  function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-  }
-</script>
+  <!-- UPDATED: toggle both sidebar and app -->
+  <script>
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('open');
+      document.querySelector('.app').classList.toggle('sidebar-open');
+    }
+  </script>
 </body>
 </html>
