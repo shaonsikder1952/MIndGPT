@@ -87,7 +87,7 @@ function attachHandlers(item) {
       currentSessionId    = sid;
       chatHistory.current = msgs;
       renderMessages(msgs, messagesDiv);
-      prevChatDiv.style.display = 'none';
+      prevChatDiv.classList.remove('open');
       prevChatBtn.setAttribute('aria-pressed','false');
     } catch (e) {
       console.error('Load session error:', e);
@@ -151,7 +151,7 @@ chatForm.addEventListener('submit', async e => {
   renderMessages(chatHistory.current, messagesDiv);
 
   // hide prev panel
-  prevChatDiv.style.display = 'none';
+  prevChatDiv.classList.remove('open');
   prevChatBtn.setAttribute('aria-pressed','false');
 
   // new session?
@@ -189,36 +189,41 @@ newChatBtn.addEventListener('click', () => {
   currentSessionId    = null;
   renderMessages([], messagesDiv);
   messageInput.focus();
-  prevChatDiv.style.display = 'none';
+  prevChatDiv.classList.remove('open');
   prevChatBtn.setAttribute('aria-pressed','false');
   document.querySelectorAll('.chat-history-item')
           .forEach(el => el.classList.remove('active'));
 });
 
 // ——— Previous toggle ———
-prevChatBtn.addEventListener('click', async () => {
+prevChatBtn.addEventListener('click', () => {
+  // toggle open/closed
+  prevChatDiv.classList.toggle('open');
+  prevChatBtn.setAttribute(
+    'aria-pressed',
+    prevChatDiv.classList.contains('open').toString()
+  );
+
   if (!currentSessionId) {
     prevChatDiv.textContent = 'No active chat session.';
-    prevChatDiv.style.display = 'block';
-    prevChatBtn.setAttribute('aria-pressed','true');
     return;
   }
-  if (prevChatDiv.style.display==='block') {
-    prevChatDiv.style.display = 'none';
-    prevChatBtn.setAttribute('aria-pressed','false');
+  if (!prevChatDiv.classList.contains('open')) {
+    // closed now, skip loading
     return;
   }
+
+  // load history
   prevChatDiv.textContent = 'Loading…';
-  prevChatDiv.style.display = 'block';
-  prevChatBtn.setAttribute('aria-pressed','true');
-  try {
-    const res = await fetch(`/session/${currentSessionId}`);
-    if (!res.ok) throw new Error();
-    const msgs = await res.json();
-    renderMessages(msgs, prevChatDiv);
-  } catch {
-    prevChatDiv.textContent = 'Failed to load.';
-  }
+  fetch(`/session/${currentSessionId}`)
+    .then(res => {
+      if (!res.ok) throw new Error();
+      return res.json();
+    })
+    .then(msgs => renderMessages(msgs, prevChatDiv))
+    .catch(() => {
+      prevChatDiv.textContent = 'Failed to load.';
+    });
 });
 
 // ——— Modal confirm/cancel ———
@@ -240,7 +245,7 @@ confirmBtn.addEventListener('click', async () => {
       if (!res.ok) throw new Error();
       document.querySelector(`.delete-session[data-session-id="${pendingDeletion}"]`)
               .closest('li').remove();
-      if (currentSessionId===pendingDeletion) {
+      if (currentSessionId === pendingDeletion) {
         currentSessionId    = null;
         chatHistory.current = [];
         renderMessages([], messagesDiv);
@@ -254,3 +259,9 @@ confirmBtn.addEventListener('click', async () => {
     window.location.href = '/logout';
   }
 });
+
+// ——— Sidebar toggle for desktop/mobile ———
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.querySelector('.app').classList.toggle('sidebar-open');
+}
