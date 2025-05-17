@@ -16,6 +16,7 @@
       <button class="logout-btn" id="logout-btn" title="Logout">
         <i class="fas fa-sign-out-alt"></i> Logout
       </button>
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     </header>
 
 
@@ -77,5 +78,11 @@
   </div>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
+<script>
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+  }
+</script>
 </body>
 </html>

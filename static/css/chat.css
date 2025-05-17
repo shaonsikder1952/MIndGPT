@@ -51,6 +51,43 @@ header .logout-btn:hover {
   background: var(--btn-hover);
 }
 
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    width: 100%;
+    height: auto;
+    max-height: 0;
+    background: var(--bg-secondary);
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    z-index: 5;
+  }
+
+  .sidebar.open {
+    max-height: 400px;
+    border-bottom: 1px solid #ccc;
+  }
+
+  .chat-area {
+    padding: 10px;
+  }
+}
+
 /* 4) Layout */
 .container {
   flex: 1;
