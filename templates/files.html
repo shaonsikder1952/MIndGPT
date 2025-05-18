@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Your Files{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/files.css') }}" />
+</head>
+<body>
+  <div id="menuToggle" class="menu-icon">☰</div>
+
+  <nav id="sidebar" class="sidebar hidden">
+    <div class="sidebar-spacer"></div>
+    <a href="{{ url_for('audio') }}">Audio</a>
+    <a href="{{ url_for('video') }}">Video</a>
+    <a href="{{ url_for('images') }}">Images</a>
+    <a href="{{ url_for('documents') }}">Documents</a>
+  </nav>
+
+  <div class="content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <script src="{{ url_for('static', filename='js/files.js') }}"></script>
+</body>
+</html>
