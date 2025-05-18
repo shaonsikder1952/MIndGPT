@@ -1,0 +1,15 @@
+{% extends "all-files.html" %}
+
+{% block title %}Audio Files{% endblock %}
+
+{% block content %}
+<h2>Audio Files</h2>
+<div class="file-list">
+  {% for file in files %}
+  <div class="file-item">
+    <span>{{ file.name }}</span>
+    <button class="return-chat-btn" onclick="location.href='{{ url_for('home') }}'">Return to Chat</button>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

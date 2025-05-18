@@ -1,4 +1,4 @@
-/* chat.css (optimized for mobile and desktop) */
+/* chat.css (clean & optimized) */
 
 /* 1) Palette variables */
 :root {
@@ -18,11 +18,13 @@
 * { box-sizing: border-box; }
 html, body {
   margin: 0; padding: 0;
-  height: 100%; overflow: hidden;
+  height: 100%; overflow: auto;
   font-family: 'Segoe UI', sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   display: flex; flex-direction: column;
+  touch-action: manipulation;
+  -ms-content-zooming: none;
 }
 
 /* 3) Header */
@@ -36,20 +38,16 @@ header {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   z-index: 10; flex-shrink: 0;
 }
-
-/* ✅ New flex container for left-side items */
 .left-header {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 header .logo {
   font-size: 1.2rem; font-weight: 600;
   color: var(--text-secondary);
   user-select: none;
 }
-
 header .logout-btn {
   padding: 6px 14px; border-radius: 4px;
   background: var(--btn-bg); color: #E5E5E5;
@@ -60,8 +58,6 @@ header .logout-btn {
 header .logout-btn:hover {
   background: var(--btn-hover);
 }
-
-/* ✅ Cleaned-up toggle button */
 .menu-toggle {
   font-size: 24px;
   background: none;
@@ -78,13 +74,12 @@ header .logout-btn:hover {
   transition: margin-left .3s ease;
 }
 
-/* 6) Sidebar (off‑canvas by default) */
+/* 6) Sidebar (off-canvas by default) */
 .sidebar {
   position: fixed; top: 50px; left: 0;
   width: 30vw;
   height: calc(100% - 50px);
   background: var(--bg-secondary);
-  border-right: 1px solid #ccc;
   display: flex; flex-direction: column;
   transform: translateX(-100%);
   transition: transform .3s ease;
@@ -93,7 +88,6 @@ header .logout-btn:hover {
 .sidebar.open {
   transform: translateX(0);
 }
-
 .app.sidebar-open .chat-area {
   margin-left: 30vw;
 }
@@ -102,30 +96,27 @@ header .logout-btn:hover {
 @media (max-width: 768px) {
   .app {
     flex-direction: column;
-    height: auto;
+    height: calc(100vh - 50px);
   }
-
   .sidebar {
-    position: fixed;
-    width: 30vw; /* ✅ Consistent width */
-    transform: translateX(-100%);
-    max-height: 100%; /* ✅ Ensure it shows full height */
-    overflow-y: auto;
+    position: relative;
+    width: 100%;
+    transform: none;
+    max-height: 0;
+    overflow: hidden;
+    border-right: none;
+    transition: max-height .3s ease;
   }
-
   .sidebar.open {
-    transform: translateX(0);
+    max-height: 50vh;
   }
-
   .app.sidebar-open .chat-area {
-    margin-left: 30vw; /* ✅ Match sidebar width */
+    margin-left: 0;
   }
-
   .chat-area {
-    height: calc(100vh - 50px); /* ✅ Fill remaining space */
+    height: calc(100vh - 50px - 200px);
   }
 }
-
 
 /* 8) Sidebar contents */
 .sidebar .new-chat,
@@ -140,7 +131,6 @@ header .logout-btn:hover {
 .sidebar .prev-toggle:hover {
   background: var(--btn-hover);
 }
-
 .prev-panel {
   max-height: 0; overflow: hidden;
   transition: max-height .3s ease;
@@ -149,7 +139,6 @@ header .logout-btn:hover {
 .prev-panel.open {
   max-height: 300px;
 }
-
 .chat-history {
   flex: 1; overflow-y: auto; padding: 0 10px;
 }
@@ -177,16 +166,31 @@ header .logout-btn:hover {
 
 /* 9) Chat area */
 .chat-area {
-  flex: 1; display: flex; flex-direction: column;
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   background: var(--bg-secondary);
-  padding: 20px; overflow: auto;
-  transition: margin-left .3s ease;
+  padding: 20px 25px;
+  min-height: 0;
+  overflow: hidden;
+  height: calc(100vh - 50px);
+  transition: margin-left 0.3s ease;
 }
+
+/* Messages container */
 .messages {
-  flex: 1; overflow-y: auto;
-  display: flex; flex-direction: column; gap: 12px;
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding-right: 10px;
+  min-height: 0;
 }
+
 .message {
   max-width: 80%; padding: 14px 20px;
   border-radius: 16px; line-height: 1.4;
@@ -210,13 +214,35 @@ form {
   flex-shrink: 0;
 }
 input[type="text"] {
-  flex: 1; padding: 12px;
-  border: none; border-radius: 12px;
-  background: var(--bg-primary); color: var(--text-primary);
-  outline: 2px solid var(--accent-primary);
+  flex: 1;
+  padding: 10px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  letter-spacing: 0.01em;
+  caret-color: var(--accent-primary);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
-input::placeholder {
+input[type="text"]:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 6px var(--accent-primary);
+  font-weight: 500;
+}
+input[type="text"]::placeholder {
   color: var(--text-secondary);
+  font-weight: 300;
+  font-style: normal;
+  font-size: 0.95rem;
+  transition: color 0.25s ease;
+}
+input[type="text"]:focus::placeholder {
+  color: var(--accent-secondary);
 }
 button.send-btn {
   padding: 0 20px; border-radius: 12px;
@@ -274,17 +300,293 @@ button.send-btn:hover {
 .modal button.cancel:hover {
   background: #eee;
 }
-/* chat.css (optimized for mobile and desktop) */
 
-/* ✅ Fix for mobile keyboard overlap (uses dynamic viewport height) */
+/* Fix for mobile keyboard overlap using dynamic viewport height */
 @supports (height: 100dvh) {
   .chat-area {
     height: calc(100dvh - 50px);
   }
-
-  @media (max-width: 768px) {
+}
+@media (max-width: 768px) {
+  @supports (height: 100dvh) {
     .chat-area {
-      height: calc(100dvh - 50px);
+      height: 100%;
     }
   }
 }
+
+/* file-section styles */
+.file-section {
+  display: none;
+}
+
+/* ── GoToFiles button and file-section styling ── */
+
+/* Container for the file section - centered overlay */
+#file-section {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  pointer-events: none; /* allow clicks to pass through except button */
+  z-index: 1000; /* above chat */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The GoToFiles button itself */
+#goToFilesBtn {
+  pointer-events: auto; /* make button clickable */
+  background: none;
+  border: none;
+  font-size: 5rem;
+  color: var(--accent-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Hide any inner text labels inside the button */
+#goToFilesBtn span,
+#goToFilesBtn .label {
+  display: none;
+}
+
+/* Hide file section and button once chat started */
+body.chat-started #file-section,
+body.chat-started #goToFilesBtn {
+  display: none !important;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Optional: hide go-to-files text */
+.go-to-files-text {
+  display: none;
+}
+/* ── GoToFiles button (lifted slightly higher) ── */
+#goToFilesBtn {
+  position: fixed;
+  top: 40%;                /* moved up from 50% */
+  left: 50%;
+  transform: translate(-50%, -40%);  /* adjust the Y‑offset */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0.25rem 0.75rem rgba(93, 164, 200, 0.4);
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* Icon sizing via font-size clamp */
+#goToFilesBtn .pdf-icon {
+  display: block;
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 1;
+}
+
+/* Hover */
+#goToFilesBtn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  box-shadow: 0 0.375rem 1.25rem rgba(0, 0, 0, 0.15);
+  transform: translate(-50%, -42%); /* maintain the lift when hovered */
+}
+
+/* Active / focus */
+#goToFilesBtn:active,
+#goToFilesBtn:focus {
+  outline: none;
+  background-color: #f5f5f5;
+  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1);
+  transform: translate(-50%, -40%);
+}
+
+/* Tablet (≤768px): smaller clamp range */
+@media (max-width: 768px) {
+  #goToFilesBtn {
+    top: 35%;
+    padding: 0.4rem 0.8rem;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    transform: translate(-50%, -35%);
+  }
+  #goToFilesBtn:hover {
+    transform: translate(-50%, -37%);
+  }
+  #goToFilesBtn .pdf-icon {
+    font-size: clamp(32px, 8vw, 60px);
+  }
+}
+
+/* Mobile (≤480px): icon‑only circle */
+@media (max-width: 480px) {
+  #goToFilesBtn {
+    top: 30%;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+    font-size: 0;
+    justify-content: center;
+    transform: translate(-50%, -30%);
+  }
+  #goToFilesBtn .pdf-icon {
+    font-size: 1.5rem;
+  }
+  #goToFilesBtn .go-to-files-text {
+    display: none;
+  }
+}
+/* 1) Palette variables — add: */
+:root {
+  /* …existing vars… */
+  --bg-sidebar: #D3D1CC;   /* a touch darker than #E8E6E3 */
+}
+
+/* 6) Sidebar (off‑canvas by default) — update background: */
+.sidebar {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  width: 30vw;
+  height: calc(100% - 50px);
+  background: var(--bg-sidebar);   /* was var(--bg-secondary) */
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform .3s ease;
+  z-index: 10;
+}
+
+/* (you can leave .sidebar.open as‑is) */
+.file-list {
+  list-style: none;
+  padding: 0;
+}
+
+.file-list li {
+  margin-bottom: 8px;
+  font-family: Arial, sans-serif;
+}
+
+.file-list li a {
+  text-decoration: none;
+  color: #0066cc;
+}
+
+.file-list li a:hover {
+  text-decoration: underline;
+}
+.message.ai p {
+  margin: 0 0 1em 0;
+  line-height: 1.4;
+  font-size: 1rem;
+  color: #222;
+}
+
+.code-block {
+  background: #f5f5f5;  /* light gray background */
+  color: #333;          /* dark text */
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
+  margin: 1em 0;
+  white-space: pre-wrap;
+  border: 1px solid #ddd;  /* subtle border */
+}
+
+.inline-code {
+  background: #eee;
+  padding: 2px 6px;
+  font-family: monospace;
+  border-radius: 3px;
+  font-size: 0.95em;
+}
+
+strong {
+  font-weight: 700;
+  color: #333;
+}
+
+em {
+  font-style: italic;
+  color: #555;
+}
+.inline-code {
+  background: #eee;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.code-wrapper {
+  background: #f9f9f9; /* Muted white */
+  border-radius: 8px;
+  padding: 1em;
+  margin: 1em 0;
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.8em;
+  padding: 4px 8px;
+  cursor: pointer;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+pre.code-block {
+  overflow-x: auto;
+  margin: 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.copy-btn {
+  background: #888888;
+  border: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  float: right;
+  margin: 4px;
+}
+
+.copy-below {
+  display: block;
+  margin: 10px auto 20px;
+  float: none;
+}
+

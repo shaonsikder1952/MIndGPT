@@ -2,9 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_session import Session
 from flask_login import LoginManager, login_user, logout_user, login_required, UserMixin, current_user
 from authlib.integrations.flask_client import OAuth
-from extensions import db, bcrypt  # ✅ imported correctly
+from extensions import db, bcrypt  # make sure bcrypt and db are initialized in extensions.py correctly
 from datetime import datetime
 import requests
+import os
+from flask import redirect, url_for
 
 # OAuth Key
 import os
@@ -17,18 +19,16 @@ app.secret_key = 'your-secret-key'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+app.config['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for local testing, disable in prod
 
-# Initialize extensions
-Session(app)
+Session(app)  # Must be before db.init_app()
+
 db.init_app(app)
 bcrypt.init_app(app)
 
-# Flask-Login Setup
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Google OAuth Setup
 oauth = OAuth(app)
 google = oauth.register(
     name='google',
@@ -41,23 +41,30 @@ google = oauth.register(
     client_kwargs={'scope': 'openid email profile'}
 )
 
+# Import custom models after db init
+from models import User, ChatSession, ChatMessage
+
+# Make sure User model inherits UserMixin (verify in models.py)
+# Example:
+# class User(db.Model, UserMixin):
+#     ...
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# Import custom models
-from models import User, ChatSession, ChatMessage
 
 # Create tables
 with app.app_context():
     db.create_all()
 
-# Routes
+
 @app.route('/')
 @login_required
 def home():
     sessions = ChatSession.query.filter_by(user_id=current_user.id).order_by(ChatSession.last_updated.desc()).all()
     return render_template('chat.html', username=current_user.email, sessions=sessions)
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -68,8 +75,9 @@ def login():
         if user and user.password and bcrypt.check_password_hash(user.password, password):
             login_user(user)
             return redirect(url_for('home'))
-        return 'Invalid credentials'
+        return 'Invalid credentials', 401
     return render_template('login.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -77,7 +85,7 @@ def signup():
         email = request.form['email']
         password = bcrypt.generate_password_hash(request.form['password']).decode('utf-8')
         if User.query.filter_by(email=email).first():
-            return 'Email already exists'
+            return 'Email already exists', 400
         new_user = User(email=email, password=password)
         db.session.add(new_user)
         db.session.commit()
@@ -85,16 +93,19 @@ def signup():
         return redirect(url_for('home'))
     return render_template('signup.html')
 
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
 
+
 @app.route('/login/google')
 def google_login():
     redirect_uri = url_for('google_authorize', _external=True)
     return google.authorize_redirect(redirect_uri)
+
 
 @app.route('/login/callback')
 def google_authorize():
@@ -111,83 +122,84 @@ def google_authorize():
 
     user = User.query.filter_by(email=user_info['email']).first()
     if not user:
-        user = User(email=user_info['email'], oauth_provider='google')
+        # User created with OAuth, password set to None
+        user = User(email=user_info['email'], oauth_provider='google', password=None)
         db.session.add(user)
         db.session.commit()
     login_user(user)
     return redirect(url_for('home'))
 
-@app.route('/chat', methods=['POST'])
+@app.route('/chat', methods=['GET', 'POST'])
 @login_required
 def chat():
-    try:
-        user_input = request.form['message']
-        current_session_id = request.form.get('session_id')
+    if request.method == 'POST':
+        try:
+            user_input = request.form['message']
+            current_session_id = request.form.get('session_id')
 
-        # Retrieve session or create new
-        chat_session = None
-        if current_session_id:
-            chat_session = ChatSession.query.filter_by(id=current_session_id, user_id=current_user.id).first()
+            chat_session = None
+            if current_session_id:
+                chat_session = ChatSession.query.filter_by(id=current_session_id, user_id=current_user.id).first()
 
-        if not chat_session:
-            now = datetime.utcnow()
-            chat_session = ChatSession(
-                user_id=current_user.id,
-                title=f"Chat started {now.strftime('%Y-%m-%d %H:%M:%S')}",
-                created_at=now,
-                last_updated=now
+            if not chat_session:
+                now = datetime.utcnow()
+                chat_session = ChatSession(
+                    user_id=current_user.id,
+                    title=f"Chat started {now.strftime('%Y-%m-%d %H:%M:%S')}",
+                    created_at=now,
+                    last_updated=now
+                )
+                db.session.add(chat_session)
+                db.session.commit()
+
+            user_msg = ChatMessage(
+                session_id=chat_session.id,
+                role='user',
+                content=user_input,
+                timestamp=datetime.utcnow()
             )
-            db.session.add(chat_session)
+            db.session.add(user_msg)
             db.session.commit()
 
-        # Save user message
-        user_msg = ChatMessage(
-            session_id=chat_session.id,
-            role='user',
-            content=user_input,
-            timestamp=datetime.utcnow()
-        )
-        db.session.add(user_msg)
-        db.session.commit()
+            messages_db = ChatMessage.query.filter_by(session_id=chat_session.id).order_by(ChatMessage.timestamp).all()
+            messages = [{"role": "system", "content": "You are a helpful assistant."}]
+            for m in messages_db:
+                messages.append({"role": m.role, "content": m.content})
 
-        # Prepare messages for OpenRouter
-        messages_db = ChatMessage.query.filter_by(session_id=chat_session.id).order_by(ChatMessage.timestamp).all()
-        messages = [{"role": "system", "content": "You are a helpful assistant."}]
-        for m in messages_db:
-            messages.append({"role": m.role, "content": m.content})
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
+                json={"model": "openai/gpt-3.5-turbo", "messages": messages}
+            )
 
-        # Call OpenRouter API
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"},
-            json={"model": "openai/gpt-3.5-turbo", "messages": messages}
-        )
+            data = response.json()
+            print("OpenRouter Response:", data)
 
-        data = response.json()
-        print("OpenRouter Response:", data)
+            if 'choices' not in data:
+                return jsonify({'response': f"OpenRouter API Error: {data}"}), 500
 
-        if 'choices' not in data:
-            return jsonify({'response': f"OpenRouter API Error: {data}"}), 500
+            reply = data['choices'][0]['message']['content']
 
-        reply = data['choices'][0]['message']['content']
+            assistant_msg = ChatMessage(
+                session_id=chat_session.id,
+                role='assistant',
+                content=reply,
+                timestamp=datetime.utcnow()
+            )
+            db.session.add(assistant_msg)
 
-        # Save assistant reply
-        assistant_msg = ChatMessage(
-            session_id=chat_session.id,
-            role='assistant',
-            content=reply,
-            timestamp=datetime.utcnow()
-        )
-        db.session.add(assistant_msg)
+            chat_session.last_updated = datetime.utcnow()
+            db.session.commit()
 
-        chat_session.last_updated = datetime.utcnow()
-        db.session.commit()
+            return jsonify({'response': reply, 'session_id': chat_session.id})
 
-        return jsonify({'response': reply, 'session_id': chat_session.id})
+        except Exception as e:
+            print("OpenRouter API Error:", e)
+            return jsonify({'response': f"Error: {str(e)}"}), 500
 
-    except Exception as e:
-        print("OpenRouter API Error:", e)
-        return jsonify({'response': f"Error: {str(e)}"}), 500
+    else:
+        return render_template('chat.html', username=current_user.email)
+
 
 @app.route('/sessions')
 @login_required
@@ -195,6 +207,7 @@ def get_sessions_route():
     sessions = ChatSession.query.filter_by(user_id=current_user.id).order_by(ChatSession.last_updated.desc()).all()
     result = [{"id": s.id, "title": s.title} for s in sessions]
     return jsonify(result)
+
 
 @app.route('/session/<int:session_id>')
 @login_required
@@ -205,6 +218,7 @@ def get_session_messages(session_id):
     messages = ChatMessage.query.filter_by(session_id=chat_session.id).order_by(ChatMessage.timestamp).all()
     return jsonify([{"role": m.role, "content": m.content} for m in messages])
 
+
 @app.route('/delete-session/<int:session_id>', methods=['DELETE'])
 @login_required
 def delete_session(session_id):
@@ -213,9 +227,80 @@ def delete_session(session_id):
     db.session.commit()
     return '', 204
 
+
 @app.route('/static/css/style.css')
 def style():
     return app.send_static_file('css/style.css')
+
+
+@app.route('/get_files/<category>')
+@login_required
+def get_files(category):
+    user_id = current_user.id  # fixed: use actual logged in user id
+    base_dir = f"uploads/{user_id}/"
+    cat_map = {
+        "audio": "audio",
+        "video": "videos",
+        "text": "texts",
+        "image": "photos"
+    }
+    dir_path = os.path.join(base_dir, cat_map.get(category, ""))
+    if not os.path.exists(dir_path):
+        return jsonify([])
+
+    files = os.listdir(dir_path)
+    return jsonify([
+        {"name": f, "path": f"/{dir_path}/{f}"} for f in files
+    ])
+
+
+@app.route('/files')
+@login_required
+def files():
+    user_id = current_user.id
+    base_dir = f"uploads/{user_id}/"
+
+    all_files = []
+    categories = ['audio', 'videos', 'texts', 'photos']
+
+    for cat in categories:
+        dir_path = os.path.join(base_dir, cat)
+        if not os.path.exists(dir_path):
+            continue
+        for filename in os.listdir(dir_path):
+            filepath = os.path.join(dir_path, filename)
+            if os.path.isfile(filepath):
+                mtime = os.path.getmtime(filepath)
+                all_files.append({
+                    'name': filename,
+                    'path': f"/{filepath.replace(os.sep, '/')}",
+                    'category': cat,
+                    'upload_date': datetime.fromtimestamp(mtime)
+                })
+
+    all_files.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return render_template('all-files.html', files=all_files)  # <-- fixed: all_files, not all-files
+
+@app.route('/files/images')
+@login_required
+def images():
+    return render_template('images.html')
+
+@app.route('/files/audio')
+@login_required
+def audio():
+    return render_template('audio.html')
+
+@app.route('/files/video')
+@login_required
+def video():
+    return render_template('video.html')
+
+@app.route('/files/documents')
+@login_required
+def documents():
+    return render_template('documents.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

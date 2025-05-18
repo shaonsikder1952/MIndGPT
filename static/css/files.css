@@ -1,0 +1,146 @@
+:root {
+  --sidebar-width: 220px;
+  --bg-secondary: rgba(232,230,227,1);       /* main background */
+  --sidebar-bg: rgba(212,210,207,1);         /* slightly darker sidebar */
+  --text-primary: #333333;
+  --btn-bg: #111111;
+  --btn-hover: #333333;
+  --accent-primary: #5DA4C8;
+  --content-bg: #ffffff;
+}
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* Top Bar Layout */
+.top-bar {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 150;
+}
+
+/* Menu Button */
+.menu-icon {
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px 15px;
+  background: var(--btn-bg);
+  color: #E5E5E5;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  transition: background 0.3s ease;
+}
+.menu-icon:hover {
+  background: var(--btn-hover);
+}
+
+/* Return to Chat Button */
+.return-btn {
+  padding: 10px 15px;
+  background: var(--btn-bg);
+  color: #E5E5E5;
+  text-decoration: none;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  transition: background 0.3s ease;
+  font-size: 16px;
+}
+.return-btn:hover {
+  background: var(--btn-hover);
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--sidebar-bg);
+  padding: 60px 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+  z-index: 100;
+  transform: translateX(0);
+}
+.sidebar.hidden {
+  transform: translateX(-100%);
+}
+.sidebar-spacer {
+  height: 50px;
+  pointer-events: none;
+}
+.sidebar a {
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 18px;
+  padding: 10px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.sidebar a:hover {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+/* Layout Wrapper */
+.layout {
+  display: flex;
+  transition: margin-left 0.3s ease;
+}
+
+/* Content */
+.content {
+  background: var(--content-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 30px;
+  max-width: 900px;
+  margin: 80px auto 20px auto;
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+}
+.content h1 {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--btn-bg);
+  margin-bottom: 20px;
+}
+.content p {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #555;
+}
+
+/* Responsive Fix: Ensure content shifts on small screens if needed */
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    padding: 20px;
+    z-index: 200;
+  }
+
+  .content {
+    margin: 100px 15px 20px 15px;
+  }
+}

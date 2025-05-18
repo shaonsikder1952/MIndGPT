@@ -10,7 +10,7 @@
   />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}" />
 </head>
-<body>
+<body class="{% if chat_started %}chat-started{% endif %}">
   <header>
   <div class="left-header">
     <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
@@ -54,6 +54,14 @@
     </nav>
 
     <main class="chat-area" role="main" aria-live="polite">
+      <div id="file-section" class="file-section{% if chat_started %} hidden{% endif %}" style="text-align:center; margin-top: 50px;">
+  <a id="goToFilesBtn" href="/files" class="go-to-files-btn" aria-label="Go to Files">
+  <i class="fas fa-folder-open pdf-icon"></i>
+  <div class="go-to-files-text">Go to files</div>
+</a>
+  <div id="fileView"></div>
+</div>
+
       <div class="messages" id="messages" aria-label="Chat messages"></div>
       <form id="chat-form" aria-label="Send message form">
         <input
