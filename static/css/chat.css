@@ -1,4 +1,4 @@
-/* chat.css (clean & optimized) */
+/* chat.css (clean & optimized, responsive for PC, tablet, and mobile) */
 
 /* 1) Palette variables */
 :root {
@@ -12,6 +12,7 @@
   --btn-bg:          #111111;
   --btn-hover:       #333333;
   --modal-overlay-bg: rgba(0, 0, 0, 0.7);
+  --bg-sidebar: #D3D1CC;
 }
 
 /* 2) Reset & base */
@@ -38,7 +39,11 @@ header {
   box-shadow: 0 1px 4px rgba(0,0,0,0.1);
   z-index: 10; flex-shrink: 0;
 }
-.left-header { display: flex; align-items: center; gap: 12px; }
+.left-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 header .logo {
   font-size: 1.2rem; font-weight: 600;
   color: var(--text-secondary);
@@ -51,7 +56,9 @@ header .logout-btn {
   display: flex; align-items: center; gap: 6px;
   transition: background .2s;
 }
-header .logout-btn:hover { background: var(--btn-hover); }
+header .logout-btn:hover {
+  background: var(--btn-hover);
+}
 .menu-toggle {
   font-size: 24px;
   background: none;
@@ -72,27 +79,76 @@ header .logout-btn:hover { background: var(--btn-hover); }
 .sidebar {
   position: fixed; top: 50px; left: 0;
   width: 30vw;
+  max-width: 420px;
+  min-width: 260px;
   height: calc(100% - 50px);
-  background: var(--bg-secondary);
+  background: var(--bg-sidebar);
   display: flex; flex-direction: column;
   transform: translateX(-100%);
-  transition: transform .3s ease;
+  transition: transform .3s ease, width .3s;
   z-index: 10;
 }
-.sidebar.open { transform: translateX(0); }
-.app.sidebar-open .chat-area { margin-left: 30vw; }
+.sidebar.open {
+  transform: translateX(0);
+}
+.app.sidebar-open .chat-area {
+  margin-left: 30vw;
+}
 
-/* 7) Responsive override (mobile) */
-@media (max-width: 768px) {
-  .app { flex-direction: column; height: calc(100vh - 50px); }
-  .sidebar {
-    position: relative; width: 100%; transform: none;
-    max-height: 0; overflow: hidden; border-right: none;
-    transition: max-height .3s ease;
+/* Tablet: sidebar takes 40% */
+@media (max-width: 1024px) {
+  .sidebar, .app.sidebar-open .chat-area {
+    width: 40vw;
+    max-width: 70vw;
+    min-width: 200px;
+    margin-left: 40vw;
   }
-  .sidebar.open { max-height: 50vh; }
-  .app.sidebar-open .chat-area { margin-left: 0; }
-  .chat-area { height: calc(100vh - 50px - 200px); }
+}
+
+/* Mobile: sidebar takes left half, overlays content */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+    height: calc(100vh - 50px);
+  }
+  .sidebar {
+    position: fixed;
+    width: 50vw;
+    min-width: 140px;
+    max-width: 90vw;
+    left: 0;
+    top: 50px;
+    height: calc(100% - 50px);
+    transform: translateX(-100%);
+    transition: transform .3s, width .3s;
+    z-index: 100;
+    border-right: 1px solid #bbb;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 2px 0 16px rgba(0,0,0,.13);
+  }
+  .app.sidebar-open .chat-area {
+    margin-left: 0;
+    filter: blur(2px);
+    pointer-events: none;
+  }
+  .chat-area {
+    height: calc(100vh - 50px);
+  }
+}
+
+/* Sidebar overlays most of the screen for very small devices */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 90vw;
+    min-width: 0;
+    max-width: 100vw;
+    left: 0;
+    top: 50px;
+    height: 60vh;
+    border-radius: 0 1rem 1rem 0;
+  }
 }
 
 /* 8) Sidebar contents */
@@ -105,20 +161,37 @@ header .logout-btn:hover { background: var(--btn-hover); }
   margin: 10px; transition: background .2s;
 }
 .sidebar .new-chat:hover,
-.sidebar .prev-toggle:hover { background: var(--btn-hover); }
-.prev-panel { max-height: 0; overflow: hidden; transition: max-height .3s ease; padding: 0 10px; }
-.prev-panel.open { max-height: 300px; }
-.chat-history { flex: 1; overflow-y: auto; padding: 0 10px; }
-.chat-history ul { list-style: none; margin: 0; padding: 0; }
+.sidebar .prev-toggle:hover {
+  background: var(--btn-hover);
+}
+.prev-panel {
+  max-height: 0; overflow: hidden;
+  transition: max-height .3s ease;
+  padding: 0 10px;
+}
+.prev-panel.open {
+  max-height: 300px;
+}
+.chat-history {
+  flex: 1; overflow-y: auto; padding: 0 10px;
+}
+.chat-history ul {
+  list-style: none; margin: 0; padding: 0;
+}
 .chat-history-item {
   display: flex; align-items: center; gap: 10px;
   padding: 12px; margin-bottom: 8px;
   background: var(--bg-primary);
   color: var(--text-secondary);
-  border-radius: 8px; cursor: pointer; transition: background .2s;
+  border-radius: 8px; cursor: pointer;
+  transition: background .2s;
 }
-.chat-history-item i { color: var(--accent-primary); }
-.chat-history-item:hover { background: var(--bg-secondary); }
+.chat-history-item i {
+  color: var(--accent-primary);
+}
+.chat-history-item:hover {
+  background: var(--bg-secondary);
+}
 .chat-history-item.active {
   background: var(--accent-primary);
   color: #fff; font-weight: bold;
@@ -140,13 +213,22 @@ header .logout-btn:hover { background: var(--btn-hover); }
 
 /* Messages container */
 .messages {
-  position: relative; z-index: 1;
+  position: relative;
+  z-index: 1;
   flex: 1 1 auto;
   overflow-y: auto;
-  display: flex; flex-direction: column;
-  gap: 12px; padding-right: 10px; min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 10px;
+  min-height: 0;
 }
-.message { max-width: 80%; padding: 14px 20px; border-radius: 16px; line-height: 1.4; word-wrap: break-word; font-size: 1rem; }
+
+.message {
+  max-width: 80%; padding: 14px 20px;
+  border-radius: 16px; line-height: 1.4;
+  word-wrap: break-word; font-size: 1rem;
+}
 .message.user {
   background: rgba(93,164,200,0.1);
   border: 1px solid var(--accent-primary);
@@ -159,69 +241,331 @@ header .logout-btn:hover { background: var(--btn-hover); }
 }
 
 /* 10) Input form */
-form { display: flex; gap: 10px; border-top: 1px solid #ccc; padding-top: 10px; flex-shrink: 0; }
+form {
+  display: flex; gap: 10px;
+  border-top: 1px solid #ccc; padding-top: 10px;
+  flex-shrink: 0;
+}
 input[type="text"] {
-  flex: 1; padding: 10px 16px; border: 1.5px solid #ddd;
-  border-radius: 12px; background: #fff;
-  color: var(--text-primary); font-family: 'Segoe UI', sans-serif;
-  font-size: 1rem; outline: none;
+  flex: 1;
+  padding: 10px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text-primary);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  outline: none;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  caret-color: var(--accent-primary); box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  letter-spacing: 0.01em;
+  caret-color: var(--accent-primary);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 input[type="text"]:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 6px var(--accent-primary);
+  font-weight: 500;
 }
-button.send-btn { padding: 0 20px; border-radius: 12px; background: var(--btn-bg); color: #E5E5E5; border: none; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: background .2s; }
-button.send-btn:hover { background: var(--btn-hover); }
+input[type="text"]::placeholder {
+  color: var(--text-secondary);
+  font-weight: 300;
+  font-style: normal;
+  font-size: 0.95rem;
+  transition: color 0.25s ease;
+}
+input[type="text"]:focus::placeholder {
+  color: var(--accent-secondary);
+}
+button.send-btn {
+  padding: 0 20px; border-radius: 12px;
+  background: var(--btn-bg); color: #E5E5E5;
+  border: none; display: flex; align-items: center; gap: 6px;
+  cursor: pointer; transition: background .2s;
+}
+button.send-btn:hover {
+  background: var(--btn-hover);
+}
 
 /* 11) Scrollbar */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-secondary); }
-::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 4px; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
 
 /* 12) Modal Overlay & Dialog */
-.modal-overlay { position: fixed; inset: 0; background: var(--modal-overlay-bg); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-.modal { background: var(--bg-secondary); padding: 24px 32px; border-radius: 8px; max-width: 320px; width: 90%; box-shadow: 0 6px 16px rgba(0,0,0,0.2); text-align: center; color: var(--text-primary); }
-.modal p { margin: 0 0 20px; color: var(--text-secondary); }
-.modal button { margin: 0 8px; padding: 10px 20px; border: 1px solid #000; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background .2s; }
-.modal button.confirm { background: #000; color: #fff; border-color: #000; }
-.modal button.confirm:hover { background: #222; }
-.modal button.cancel { background: #fff; color: #000; }
-.modal button.cancel:hover { background: #eee; }
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: var(--modal-overlay-bg);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.modal {
+  background: var(--bg-secondary);
+  padding: 24px 32px; border-radius: 8px;
+  max-width: 320px; width: 90%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  text-align: center; color: var(--text-primary);
+}
+.modal p {
+  margin: 0 0 20px; color: var(--text-secondary);
+}
+.modal button {
+  margin: 0 8px; padding: 10px 20px;
+  border: 1px solid #000; border-radius: 6px;
+  font-weight: 600; cursor: pointer; transition: background .2s;
+}
+.modal button.confirm {
+  background: #000; color: #fff; border-color: #000;
+}
+.modal button.confirm:hover {
+  background: #222;
+}
+.modal button.cancel {
+  background: #fff; color: #000;
+}
+.modal button.cancel:hover {
+  background: #eee;
+}
 
 /* Fix for mobile keyboard overlap using dynamic viewport height */
 @supports (height: 100dvh) {
-  .chat-area { height: calc(100dvh - 50px); }
+  .chat-area {
+    height: calc(100dvh - 50px);
+  }
 }
 @media (max-width: 768px) {
   @supports (height: 100dvh) {
-    .chat-area { height: 100%; }
+    .chat-area {
+      height: 100%;
+    }
   }
 }
 
 /* file-section styles */
-.file-section { display: none; }
-
-/* GoToFiles button styling */
-#file-section { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: transparent; width: auto; height: auto; padding: 0; margin: 0; pointer-events: none; z-index: 1000; display: flex; justify-content: center; align-items: center; }
-#goToFilesBtn { pointer-events: auto; background: none; border: none; font-size: 5rem; color: var(--accent-primary); cursor: pointer; display: flex; justify-content: center; align-items: center; }
-#goToFilesBtn span, #goToFilesBtn .label { display: none; }
-body.chat-started #file-section, body.chat-started #goToFilesBtn { display: none !important; visibility: hidden; opacity: 0; }
-.go-to-files-text { display: none; }
-#goToFilesBtn { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -40%); display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--accent-primary); color: var(--bg-primary); border: none; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; text-decoration: none; box-shadow: 0 0.25rem 0.75rem rgba(93,164,200,0.4); transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease; cursor: pointer; overflow: hidden; z-index: 9999; pointer-events: auto; display: flex; align-items: center; gap: 0.5rem; }
-#goToFilesBtn .pdf-icon { display: block; font-size: clamp(40px, 6vw, 80px); line-height: 1; }
-#goToFilesBtn:hover { background-color: var(--bg-secondary); color: var(--text-secondary); box-shadow: 0 0.375rem 1.25rem rgba(0,0,0,0.15); transform: translate(-50%, -42%); }
-@media (max-width: 768px) { #goToFilesBtn { top: 35%; padding: 0.4rem 0.8rem; gap: 0.0.4rem; font-size: 0.9rem; transform: translate(-50%, -35%); } #goToFilesBtn:hover { transform: translate(-50%, -37%); } #goToFilesBtn .pdf-icon { font-size: clamp(32px, 8vw, 60px); } }
-@media (max-width: 480px) { #goToFilesBtn { top: 30%; width: 3.5rem; height: 3.5rem; padding: 0; gap: 0; border-radius: 50%; font-size: 0; justify-content: center; transform: translate(-50%, -30%); } #goToFilesBtn .pdf-icon { font-size: 1.5rem; } #goToFilesBtn .go-to-files-text { display: none; } }
-
-/* Mobile sidebar slide-down (minimal) */
-@media (max-width: 768px) {
-  .sidebar { position: relative; width: 100%; transform: none; max-height: 0; overflow: hidden; transition: max-height .3s ease; }
-  .sidebar.open { max-height: 50vh; }
+.file-section {
+  display: none;
 }
 
-/* GoToFiles reposition mobile */
+/* ── GoToFiles button and file-section styling ── */
+#file-section {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: transparent;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* The GoToFiles button itself */
+#goToFilesBtn {
+  pointer-events: auto;
+  background: var(--accent-primary);
+  border: none;
+  font-size: 5rem;
+  color: var(--bg-primary);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 0.25rem 0.75rem rgba(93, 164, 200, 0.4);
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.2s ease;
+  overflow: hidden;
+  z-index: 9999;
+}
+#goToFilesBtn .pdf-icon {
+  display: block;
+  font-size: clamp(40px, 6vw, 80px);
+  line-height: 1;
+}
+
+/* Hide any inner text labels inside the button */
+#goToFilesBtn span,
+#goToFilesBtn .label {
+  display: none;
+}
+
+/* Hide file section and button once chat started */
+body.chat-started #file-section,
+body.chat-started #goToFilesBtn {
+  display: none !important;
+  visibility: hidden;
+  opacity: 0;
+}
+.go-to-files-text {
+  display: none;
+}
+
+/* Tablet (≤768px): GoToFiles smaller */
+@media (max-width: 768px) {
+  #goToFilesBtn {
+    top: 35%;
+    left: 50%;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    transform: translate(-50%, -35%);
+  }
+  #goToFilesBtn .pdf-icon {
+    font-size: clamp(32px, 8vw, 60px);
+  }
+}
+
+/* Mobile (≤480px): GoToFiles is a circle, not overlapped */
 @media (max-width: 480px) {
-  #goToFilesBtn { top: auto; bottom: 60px; left: 50%; transform: translateX(-50%); }
+  #goToFilesBtn {
+    top: 60px; /* just below header */
+    left: 85vw; /* right side, not overlapped by sidebar */
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    gap: 0;
+    border-radius: 50%;
+    font-size: 0;
+    justify-content: center;
+    transform: none;
+    box-shadow: 0 0.15rem 0.45rem rgba(93, 164, 200, 0.15);
+  }
+  #goToFilesBtn .pdf-icon {
+    font-size: 1.5rem;
+  }
+  #goToFilesBtn .go-to-files-text {
+    display: none;
+  }
+}
+
+/* (you can leave .sidebar.open as‑is) */
+.file-list {
+  list-style: none;
+  padding: 0;
+}
+
+.file-list li {
+  margin-bottom: 8px;
+  font-family: Arial, sans-serif;
+}
+
+.file-list li a {
+  text-decoration: none;
+  color: #0066cc;
+}
+
+.file-list li a:hover {
+  text-decoration: underline;
+}
+.message.ai p {
+  margin: 0 0 1em 0;
+  line-height: 1.4;
+  font-size: 1rem;
+  color: #222;
+}
+
+.code-block {
+  background: #f5f5f5;
+  color: #333;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: 'Source Code Pro', monospace;
+  font-size: 0.9rem;
+  margin: 1em 0;
+  white-space: pre-wrap;
+  border: 1px solid #ddd;
+}
+
+.inline-code {
+  background: #eee;
+  padding: 2px 6px;
+  font-family: monospace;
+  border-radius: 3px;
+  font-size: 0.95em;
+}
+
+strong {
+  font-weight: 700;
+  color: #333;
+}
+
+em {
+  font-style: italic;
+  color: #555;
+}
+.inline-code {
+  background: #eee;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+.code-wrapper {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1em;
+  margin: 1em 0;
+  position: relative;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.8em;
+  padding: 4px 8px;
+  cursor: pointer;
+  border: none;
+  background: #007bff;
+  color: white;
+  border-radius: 4px;
+  z-index: 1;
+}
+
+pre.code-block {
+  overflow-x: auto;
+  margin: 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.copy-btn {
+  background: #888888;
+  border: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  float: right;
+  margin: 4px;
+}
+
+.copy-below {
+  display: block;
+  margin: 10px auto 20px;
+  float: none;
 }
