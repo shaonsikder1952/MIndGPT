@@ -2,22 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Your Files</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/files.css') }}" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Your Files{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/files.css') }}">
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
 </head>
 <body>
 
-  <!-- Top Controls: Menu Icon and Return Button -->
+  <!-- Top Bar -->
   <div class="top-bar">
     <div id="menuToggle" class="menu-icon">☰</div>
     <a href="{{ url_for('chat') }}" class="return-btn">← Return to Chat</a>
   </div>
 
-  <!-- Layout Wrapper for Sidebar + Content -->
+  <!-- Layout Wrapper -->
   <div class="layout">
-    <!-- Sidebar Menu -->
+    <!-- Sidebar -->
     <nav id="sidebar" class="sidebar hidden">
-      <div class="sidebar-spacer"></div>
       <a href="{{ url_for('audio') }}">Audio</a>
       <a href="{{ url_for('video') }}">Video</a>
       <a href="{{ url_for('images') }}">Images</a>
@@ -26,8 +29,22 @@
 
     <!-- Main Content -->
     <div class="content">
-      <h1>All Uploaded Files</h1>
-      <p>Here you can browse all your uploaded files categorized into Audio, Video, Images, and Documents.</p>
+      {% block content %}
+        <h1>All Uploaded Files</h1>
+        <p>Here you can browse all your uploaded files categorized into Audio, Video, Images, and Documents.</p>
+
+        <!-- Smart Upload Box (only here!) -->
+        <div id="uploadBox">
+          <form id="uploadForm" action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            <label for="fileInput" class="custom-file-upload">📁 Choose File</label>
+            <input id="fileInput" type="file" name="file" required>
+            <button type="submit" class="upload-button">⬆️ Upload</button>
+          </form>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div id="fileGallery" class="gallery"></div>
+      {% endblock %}
     </div>
   </div>
 

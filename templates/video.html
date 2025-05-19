@@ -1,8 +1,163 @@
 {% extends "all-files.html" %}
 
-{% block title %}Video{% endblock %}
+{% block title %}Video Gallery{% endblock %}
 
 {% block content %}
-  <h1>Video Page</h1>
-  <p>Your video files go here.</p>
+  <!-- Go Back To Files Button (modern style) -->
+  <div class="back-btn-container">
+    <a href="{{ url_for('files') }}" class="modern-btn">← Go Back To Files</a>
+  </div>
+
+  <h2>Video Gallery</h2>
+
+  <!-- Gallery Grid -->
+  <div class="gallery">
+    {% if files %}
+      {% for file in files %}
+        <div class="card" data-filename="{{ file.name }}" data-category="video">
+          <button class="delete-btn" title="Delete">&times;</button>
+
+          <!-- video element -->
+          <video class="player" preload="metadata" playsinline>
+            <source src="{{ file.url }}" type="video/{{ file.name.rsplit('.',1)[-1] }}">
+          </video>
+
+          <!-- Minimal controls -->
+          <div class="controls minimal">
+            <button class="btn toggle-play">▶</button>
+            <button class="btn fullscreen">⛶</button>
+          </div>
+
+          <!-- Fullscreen-only controls -->
+          <div class="controls fullscreen-only hidden">
+            <button class="btn skip-back">«10s</button>
+            <button class="btn skip-forward">10s»</button>
+            <label class="btn">
+              Speed
+              <select class="speed">
+                <option>0.5×</option><option>0.75×</option>
+                <option selected>1×</option>
+                <option>1.25×</option><option>1.5×</option><option>2×</option>
+              </select>
+            </label>
+            <a class="btn download" href="{{ file.url }}" download title="Download">⬇</a>
+            <button class="btn close">×</button>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No videos uploaded yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- gallery‑specific styles (keep these) -->
+  <style>
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+      gap: 12px;
+    }
+    .card {
+      position: relative;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .delete-btn {
+      position: absolute; top: 8px; right: 8px;
+      width:24px; height:24px; border:none; border-radius:50%;
+      background:#e74c3c; color:#fff; font-size:16px; cursor:pointer;
+      opacity:.8; transition:opacity .2s; z-index:2;
+    }
+    .delete-btn:hover { opacity:1; }
+    .player {
+      width: 100%;
+      background: #000;
+      display: block;
+    }
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding: 8px;
+      background: #f9f9f9;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .minimal { justify-content: space-between; }
+    .hidden { display: none !important; }
+    .btn {
+      border: 1px solid #ccc; background: #fff; padding: 4px 8px;
+      border-radius: 4px; font-size: .9em; cursor: pointer;
+      display: flex; align-items: center;
+    }
+    .btn:hover { background: #f0f0f0; }
+    select { border: none; background: transparent; cursor: pointer; }
+  </style>
+
+  <script>
+    // Video card behaviors
+    document.querySelectorAll('.card').forEach(card => {
+      const video = card.querySelector('.player');
+      const playBtn = card.querySelector('.toggle-play');
+      const fullscreenBtn = card.querySelector('.fullscreen');
+      const fullControls = card.querySelector('.fullscreen-only');
+      const minimalControls = card.querySelector('.minimal');
+
+      playBtn.addEventListener('click', () => {
+        if (video.paused) {
+          video.play();
+          playBtn.textContent = '❚❚';
+        } else {
+          video.pause();
+          playBtn.textContent = '▶';
+        }
+      });
+
+      fullscreenBtn.addEventListener('click', () => {
+        if (video.requestFullscreen) video.requestFullscreen();
+        else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+      });
+
+      fullControls.querySelector('.skip-back').addEventListener('click', () => {
+        video.currentTime = Math.max(0, video.currentTime - 10);
+      });
+      fullControls.querySelector('.skip-forward').addEventListener('click', () => {
+        video.currentTime += 10;
+      });
+
+      fullControls.querySelector('.speed').addEventListener('change', e => {
+        video.playbackRate = parseFloat(e.target.value);
+      });
+
+      fullControls.querySelector('.close').addEventListener('click', () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        const isFS = document.fullscreenElement === video;
+        fullControls.classList.toggle('hidden', !isFS);
+        minimalControls.classList.toggle('hidden', isFS);
+      });
+
+      card.querySelector('.delete-btn').addEventListener('click', async e => {
+        e.stopPropagation();
+        if (!confirm(`Delete “${card.dataset.filename}”?`)) return;
+        const resp = await fetch(
+          `/delete-file/${card.dataset.category}/${encodeURIComponent(card.dataset.filename)}`,
+          { method: 'DELETE', credentials: 'include' }
+        );
+        if (resp.ok) card.remove();
+        else alert('Delete failed');
+      });
+    });
+
+    // No upload form here—handled by all-files.html
+  </script>
 {% endblock %}

@@ -288,22 +288,191 @@ def files():
 @app.route('/files/images')
 @login_required
 def images():
-    return render_template('images.html')
+    user_id = current_user.id
+    user_photo_dir = os.path.join('uploads', str(user_id), 'photos')
+
+    if not os.path.exists(user_photo_dir):
+        files = []
+    else:
+        files = []
+        for filename in os.listdir(user_photo_dir):
+            filepath = os.path.join(user_photo_dir, filename)
+            if os.path.isfile(filepath):
+                mtime = os.path.getmtime(filepath)
+                files.append({
+                    'name': filename,
+                    'url': url_for('uploaded_files', user_id=user_id, subpath=f"photos/{filename}"),
+                    'upload_date': datetime.fromtimestamp(mtime)
+                })
+
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return render_template('images.html', files=files)
 
 @app.route('/files/audio')
 @login_required
 def audio():
-    return render_template('audio.html')
+    user_id = current_user.id
+    user_audio_dir = os.path.join('uploads', str(user_id), 'audio')
+
+    if not os.path.exists(user_audio_dir):
+        files = []
+    else:
+        files = []
+        for filename in os.listdir(user_audio_dir):
+            filepath = os.path.join(user_audio_dir, filename)
+            if os.path.isfile(filepath):
+                mtime = os.path.getmtime(filepath)
+                files.append({
+                    'name': filename,
+                    'url': url_for('uploaded_files', user_id=user_id, subpath=f"audio/{filename}"),
+                    'upload_date': datetime.fromtimestamp(mtime)
+                })
+
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return render_template('audio.html', files=files)
+
 
 @app.route('/files/video')
 @login_required
 def video():
-    return render_template('video.html')
+    user_id = current_user.id
+    user_video_dir = os.path.join('uploads', str(user_id), 'videos')
+
+    if not os.path.exists(user_video_dir):
+        files = []
+    else:
+        files = []
+        for filename in os.listdir(user_video_dir):
+            filepath = os.path.join(user_video_dir, filename)
+            if os.path.isfile(filepath):
+                mtime = os.path.getmtime(filepath)
+                files.append({
+                    'name': filename,
+                    'url': url_for('uploaded_files', user_id=user_id, subpath=f"videos/{filename}"),
+                    'upload_date': datetime.fromtimestamp(mtime)
+                })
+
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return render_template('video.html', files=files)
+
 
 @app.route('/files/documents')
 @login_required
 def documents():
-    return render_template('documents.html')
+    user_id = current_user.id
+    user_doc_dir = os.path.join('uploads', str(user_id), 'texts')
+
+    if not os.path.exists(user_doc_dir):
+        files = []
+    else:
+        files = []
+        for filename in os.listdir(user_doc_dir):
+            filepath = os.path.join(user_doc_dir, filename)
+            if os.path.isfile(filepath):
+                mtime = os.path.getmtime(filepath)
+                files.append({
+                    'name': filename,
+                    'url': url_for('uploaded_files', user_id=user_id, subpath=f"texts/{filename}"),
+                    'upload_date': datetime.fromtimestamp(mtime)
+                })
+
+        files.sort(key=lambda x: x['upload_date'], reverse=True)
+
+    return render_template('documents.html', files=files)
+
+
+from flask import request, jsonify
+from werkzeug.utils import secure_filename
+import os
+
+@app.route('/delete-file/<category>/<filename>', methods=['DELETE'])
+@login_required
+def delete_file(category, filename):
+    # map URL category to your upload folder
+    folder_map = {
+        'image': 'photos',
+        'video': 'videos',
+        'audio': 'audio',
+        'text': 'texts',
+        # you could also support 'others' here if you like
+    }
+    if category not in folder_map:
+        return jsonify({'error': 'Invalid category'}), 400
+
+    user_folder = os.path.join('uploads', str(current_user.id), folder_map[category])
+    file_path = os.path.join(user_folder, filename)
+
+    if not os.path.isfile(file_path):
+        return jsonify({'error': 'File not found'}), 404
+
+    try:
+        os.remove(file_path)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload_file():
+    # Check if 'file' part exists in the request
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part in request'}), 400
+
+    files = request.files.getlist('file')
+    if not files or files[0].filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    saved_files = []
+
+    for file in files:
+        filename = secure_filename(file.filename)
+        ext = filename.rsplit('.', 1)[-1].lower()
+
+        # Folder categorization by file extension
+        if ext in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+            folder = 'photos'
+        elif ext in ['mp4', 'avi', 'mov', 'mkv', 'webm']:
+            folder = 'videos'
+        elif ext in ['mp3', 'wav', 'aac', 'ogg']:
+            folder = 'audio'
+        elif ext in ['txt', 'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx']:
+            folder = 'texts'
+        else:
+            folder = 'others'
+
+        # Construct user folder path
+        user_folder = os.path.join('uploads', str(current_user.id), folder)
+        os.makedirs(user_folder, exist_ok=True)
+
+        # Full path to save the file
+        save_path = os.path.join(user_folder, filename)
+
+        # Save the file
+        file.save(save_path)
+
+        # Save info for response
+        saved_files.append({
+            'filename': filename,
+            'path': f"/{save_path.replace(os.sep, '/')}",
+            'category': folder
+        })
+
+    return jsonify({'message': 'Files uploaded successfully', 'files': saved_files})
+
+from flask import send_from_directory
+
+@app.route('/uploads/<int:user_id>/<path:subpath>')
+@login_required
+def uploaded_files(user_id, subpath):
+    if user_id != current_user.id:
+        return "Unauthorized", 403
+    user_folder = os.path.join('uploads', str(user_id))
+    return send_from_directory(user_folder, subpath)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,8 +1,112 @@
 {% extends "all-files.html" %}
 
-{% block title %}Images{% endblock %}
+{% block title %}Image Gallery{% endblock %}
 
 {% block content %}
-  <h1>Images Page</h1>
-  <p>Your image files go here.</p>
+  <!-- Go Back To Files Button (modern style) -->
+  <div class="back-btn-container">
+    <a href="{{ url_for('files') }}" class="modern-btn">← Go Back To Files</a>
+  </div>
+
+  <h2>Image Gallery</h2>
+
+  <div class="gallery">
+    {% if files %}
+      {% for file in files %}
+        <div class="file-item" data-category="image" data-filename="{{ file.name }}">
+          <button class="delete-btn" title="Delete">&times;</button>
+          <img src="{{ file.url }}" alt="{{ file.name }}">
+          <div class="file-info">
+            <p class="file-name">{{ file.name }}</p>
+            <small class="file-date">
+              Uploaded: {{ file.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}
+            </small>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No images uploaded yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- gallery‑specific styles (keep these) -->
+  <style>
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .file-item {
+      position: relative;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .file-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #e74c3c;
+      border: none;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .delete-btn:hover {
+      opacity: 1;
+    }
+    .file-item img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .file-info {
+      padding: 10px;
+      text-align: center;
+    }
+    .file-name {
+      font-weight: 600;
+      margin: 0 0 6px;
+      font-size: 0.95em;
+      word-break: break-all;
+    }
+    .file-date {
+      color: #666;
+      font-size: 0.85em;
+    }
+  </style>
+
+  <script>
+    // Delete‑file handler
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        const item = e.currentTarget.closest('.file-item');
+        const category = item.dataset.category;
+        const filename = item.dataset.filename;
+        if (!confirm(`Delete “${filename}”? This cannot be undone.`)) return;
+        const resp = await fetch(`/delete-file/${category}/${encodeURIComponent(filename)}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if (resp.ok) {
+          item.remove();
+        } else {
+          const err = await resp.json();
+          alert('Delete failed: ' + (err.error || resp.statusText));
+        }
+      });
+    });
+  </script>
 {% endblock %}

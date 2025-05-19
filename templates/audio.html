@@ -1,15 +1,123 @@
 {% extends "all-files.html" %}
 
-{% block title %}Audio Files{% endblock %}
+{% block title %}Audio Gallery{% endblock %}
 
 {% block content %}
-<h2>Audio Files</h2>
-<div class="file-list">
-  {% for file in files %}
-  <div class="file-item">
-    <span>{{ file.name }}</span>
-    <button class="return-chat-btn" onclick="location.href='{{ url_for('home') }}'">Return to Chat</button>
+  <!-- Go Back To Files Button (modern style) -->
+  <div class="back-btn-container">
+    <a href="{{ url_for('files') }}" class="modern-btn">← Go Back To Files</a>
   </div>
-  {% endfor %}
-</div>
+
+  <h2>Audio Gallery</h2>
+
+  <div class="gallery">
+    {% if files %}
+      {% for file in files %}
+        <div class="file-item" data-category="audio" data-filename="{{ file.name }}">
+          <!-- delete button -->
+          <button class="delete-btn" title="Delete">&times;</button>
+
+          <!-- file icon -->
+          <div class="file-icon">🎵</div>
+
+          <div class="file-info">
+            <p class="file-name">{{ file.name }}</p>
+            <audio controls style="width: 100%; margin-bottom: 6px;">
+              <source src="{{ file.url }}" type="audio/{{ file.name.rsplit('.',1)[-1] }}">
+              Your browser does not support audio playback.
+            </audio>
+            <small class="file-date">Uploaded: {{ file.upload_date.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>No audio files uploaded yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- gallery‑specific styles (keep these) -->
+  <style>
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .file-item {
+      position: relative;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .file-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .file-icon {
+      font-size: 2.5em;
+    }
+    .file-info {
+      width: 100%;
+      text-align: center;
+    }
+    .file-name {
+      font-weight: 600;
+      margin: 0 0 6px;
+      word-break: break-all;
+    }
+    .file-date {
+      display: block;
+      color: #666;
+      font-size: 0.85em;
+      margin-top: 6px;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #e74c3c;
+      border: none;
+      color: #fff;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      font-size: 16px;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+      z-index: 2;
+    }
+    .delete-btn:hover {
+      opacity: 1;
+    }
+  </style>
+
+  <script>
+    // Delete‑file handler
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async e => {
+        const item = e.currentTarget.closest('.file-item');
+        const category = item.dataset.category;
+        const filename = item.dataset.filename;
+        if (!confirm(`Delete “${filename}”? This cannot be undone.`)) return;
+        const resp = await fetch(`/delete-file/${category}/${encodeURIComponent(filename)}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if (resp.ok) {
+          item.remove();
+        } else {
+          const err = await resp.json();
+          alert('Delete failed: ' + (err.error || resp.statusText));
+        }
+      });
+    });
+  </script>
 {% endblock %}

@@ -1,7 +1,7 @@
 :root {
   --sidebar-width: 220px;
-  --bg-secondary: rgba(232,230,227,1);       /* main background */
-  --sidebar-bg: rgba(212,210,207,1);         /* slightly darker sidebar */
+  --bg-secondary: rgba(232,230,227,1);
+  --sidebar-bg: rgba(212,210,207,1);
   --text-primary: #333333;
   --btn-bg: #111111;
   --btn-hover: #333333;
@@ -16,7 +16,7 @@ body {
   color: var(--text-primary);
 }
 
-/* Top Bar Layout */
+/* Top Bar */
 .top-bar {
   position: fixed;
   top: 10px;
@@ -26,8 +26,6 @@ body {
   gap: 10px;
   z-index: 150;
 }
-
-/* Menu Button */
 .menu-icon {
   font-size: 24px;
   cursor: pointer;
@@ -41,8 +39,6 @@ body {
 .menu-icon:hover {
   background: var(--btn-hover);
 }
-
-/* Return to Chat Button */
 .return-btn {
   padding: 10px 15px;
   background: var(--btn-bg);
@@ -77,10 +73,6 @@ body {
 .sidebar.hidden {
   transform: translateX(-100%);
 }
-.sidebar-spacer {
-  height: 50px;
-  pointer-events: none;
-}
 .sidebar a {
   color: var(--text-primary);
   text-decoration: none;
@@ -94,7 +86,7 @@ body {
   color: #fff;
 }
 
-/* Layout Wrapper */
+/* Layout */
 .layout {
   display: flex;
   transition: margin-left 0.3s ease;
@@ -112,7 +104,7 @@ body {
   z-index: 1;
   flex-grow: 1;
 }
-.content h1 {
+.content h1, .content h2 {
   font-size: 32px;
   font-weight: 600;
   color: var(--btn-bg);
@@ -124,12 +116,22 @@ body {
   color: #555;
 }
 
-/* Responsive Fix: Ensure content shifts on small screens if needed */
-@media (max-width: 768px) {
-  .layout {
-    flex-direction: column;
-  }
+/* Gallery */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+.gallery-item {
+  max-width: 200px;
+  max-height: 150px;
+  object-fit: cover;
+}
 
+/* Responsive */
+@media (max-width: 768px) {
+  .layout { flex-direction: column; }
   .sidebar {
     width: 100%;
     height: auto;
@@ -139,8 +141,87 @@ body {
     padding: 20px;
     z-index: 200;
   }
+  .content { margin: 100px 15px 20px 15px; }
+}
 
-  .content {
-    margin: 100px 15px 20px 15px;
-  }
+/* --- Smart Upload Box Styles --- */
+
+/* Hide real file input */
+#uploadBox input[type="file"] {
+  display: none;
+}
+
+/* Container spacing */
+#uploadBox {
+  text-align: center;
+  margin: 30px 0;
+}
+
+/* “Choose File” label */
+#uploadBox .custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  color: #fff;
+  background: var(--accent-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: background 0.3s, transform 0.2s;
+  margin-right: 10px;
+}
+#uploadBox .custom-file-upload:hover {
+  background: #4c92b6;
+  transform: translateY(-2px);
+}
+
+/* “Upload” button */
+#uploadBox .upload-button {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  background: var(--btn-bg);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: background 0.3s, transform 0.2s;
+}
+#uploadBox .upload-button:hover {
+  background: var(--btn-hover);
+  transform: translateY(-2px);
+}
+/* Modern “Go Back” button – refined gray style */
+.back-btn-container {
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.modern-btn {
+  display: inline-block;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'Segoe UI', sans-serif;
+  background: #f0f0f0;            /* light gray */
+  color: #555;                    /* darker gray text */
+  border: none;
+  border-radius: 8px;             /* gently rounded */
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.modern-btn:hover {
+  background: #e0e0e0;            /* slightly darker gray */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.modern-btn:active {
+  background: #d0d0d0;            /* darkest gray on press */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  transform: translateY(0);
 }
